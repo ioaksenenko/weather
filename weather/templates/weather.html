@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load filters %}
+{% block head %}
+	{{ block.super }}
+    <script src="{% static "js/all.min.js" %}"></script>
+    <script src="{% static "js/weather.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "css/all.min.css" %}" />
+	<link rel="stylesheet" type="text/css" href="{% static "css/weather.css" %}" />
+{% endblock %}
+{% block main %}
+<div class="container-fluid">
+	<div class="row">
+        <div class="col">
+            {% if status and status == 'success' %}
+                {% if result %}
+                    {% if result.list is not None %}
+                        <ul class="nav nav-tabs" id="modules-tabs" role="tablist">
+                            {% for city in result.list %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if forloop.counter == 1 %} active {% endif %}" id="{{ city.name|lower|slugify }}-tab" data-toggle="tab" href="#tab-{{ city.name|lower|slugify }}" role="tab" aria-controls="tab-{{ city.name|lower|slugify }}" aria-selected="{% if forloop.counter == 1 %} true {% else %} false {% endif %}">{{ city.name }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="tab-content" id="modules-tabs-content">
+                            {% for city in result.list %}
+                                <div class="tab-pane fade {% if forloop.counter == 1 %} show active {% endif %}" id="tab-{{ city.name|lower|slugify }}" role="tabpanel" aria-labelledby="{{ city.name|lower|slugify }}-tab">
+                                    <div class="container-fluid mt-3">
+                                        <div class="row">
+                                            <div class="col-auto">
+                                                <img height="45" width="45" style="border: medium none; width: 45px; height: 45px; background: url('http://openweathermap.org/img/w/{{ city.weather.0.icon }}.png') repeat scroll 0 0 transparent;" alt="title" src="http://openweathermap.org/images/transparent.png">
+                                            </div>
+                                            <div class="col-auto"><b>{{ city.main.temp|add:-273.15 }}°C</b></div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col">
+                                                <p><b>Облачность:</b> {{ city.clouds.all|default:0 }}%</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <p><b>Влажность:</b> {{ city.main.humidity|default:0 }}%</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <p><b>Ветер:</b> {{ city.wind.speed|default:0 }} м/с</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <p><b>Давление:</b> {{ city.main.pressure|default:0|mul:0.7500637554192 }} мм рт. ст.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif result.cod == 200 %}
+                        <div class="container-fluid mt-3">
+                            <div class="row">
+                                <div class="col">
+                                    <h5>{{ result.name }}</h5>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-auto">
+                                    <img height="45" width="45" style="border: medium none; width: 45px; height: 45px; background: url('http://openweathermap.org/img/w/{{ result.weather.0.icon }}.png') repeat scroll 0 0 transparent;" alt="title" src="http://openweathermap.org/images/transparent.png">
+                                </div>
+                                <div class="col-auto"><b>{{ result.main.temp|add:-273.15 }}°C</b></div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col">
+                                    <p><b>Облачность:</b> {{ result.clouds.all|default:0 }}%</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <p><b>Влажность:</b> {{ result.main.humidity|default:0 }}%</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <p><b>Ветер:</b> {{ result.wind.speed|default:0 }} м/с</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <p><b>Давление:</b> {{ result.main.pressure|default:0|mul:0.7500637554192 }} мм рт. ст.</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger mt-3" role="alert">
+                            {{ result.message|capfirst }}.
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-danger mt-3" role="alert">
+                        Результат не был получен от сервера.
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-danger mt-3" role="alert">
+                    {{ result|default_if_none:'Результат не был получен от сервера.' }}
+                </div>
+            {% endif %}
+        </div>
+	</div>
+</div>
+{% endblock %}

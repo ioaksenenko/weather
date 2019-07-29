@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load filters %}
+{% block head %}
+	{{ block.super }}
+    <script src="{% static "js/all.min.js" %}"></script>
+    <script src="{% static "js/index.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "css/all.min.css" %}" />
+	<link rel="stylesheet" type="text/css" href="{% static "css/index.css" %}" />
+{% endblock %}
+{% block main %}
+<div class="container-fluid">
+	<div class="row">
+        <div class="col">
+            <h5>Каким образом желаете определить текущую погоду?</h5>
+        </div>
+	</div>
+    <div class="row">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="parameters-type" id="by-city-name" value="city-name">
+                <label class="form-check-label" for="by-city-name">
+                    По названию города
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="parameters-type" id="by-city-id" value="city-id">
+                <label class="form-check-label" for="by-city-id">
+                    По идентификатору города
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="parameters-type" id="by-geographic-coordinates" value="geographic-coordinates">
+                <label class="form-check-label" for="by-geographic-coordinates">
+                    По географическим координатам
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="parameters-type" id="by-zip-code" value="zip-code">
+                <label class="form-check-label" for="by-zip-code">
+                    По почтовому индексу
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="parameters-type" id="by-rectangle-zone" value="rectangle-zone">
+                <label class="form-check-label" for="by-rectangle-zone">
+                    Города в некотором прямоугольнике
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="parameters-type" id="by-cycle-zone" value="cycle-zone">
+                <label class="form-check-label" for="by-cycle-zone">
+                    Города в некотором круге
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row hide mt-2" id="city-name-fields">
+        <div class="col">
+            <form action="{% url 'weather' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="city-name">Название города<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="city-name" name="city-name" placeholder="Novosibirsk" data-parent="city-name-fields">
+                </div>
+                <div class="form-group">
+                    <label for="country-code">Код страны</label>
+                    <input type="text" class="form-control" id="country-code" name="country-code" placeholder="ru" data-parent="city-name-fields">
+                </div>
+                <button type="submit" class="btn btn-primary" id="get_weather" disabled>Узнать погоду</button>
+            </form>
+        </div>
+    </div>
+    <div class="row hide mt-2" id="city-id-fields">
+        <div class="col">
+            <form action="{% url 'weather' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group" id="city-id-form-group">
+                    <label for="city-id">Идентификатор города<span class="color-red">*</span></label>
+                    <div class="row">
+                        <div class="col pr-0">
+                            <input type="text" class="form-control" id="city-id" name="city-id" placeholder="1496747" data-parent="city-id-fields">
+                        </div>
+                        <div class="col pl-0">
+                            <button type="button" class="btn btn-link h-100 pt-0 pb-0" onclick="add_input()">
+                                <i class="fas fa-plus-circle fa-2x h-100"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="get_weather" disabled>Узнать погоду</button>
+            </form>
+        </div>
+    </div>
+    <div class="row hide mt-2" id="geographic-coordinates-fields">
+        <div class="col">
+            <form action="{% url 'weather' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="latitude">Градусы северной широты<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="latitude" name="latitude" placeholder="55.03" data-parent="geographic-coordinates-fields">
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Градусы восточной долготы<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="longitude" name="longitude" placeholder="82.92" data-parent="geographic-coordinates-fields">
+                </div>
+                <button type="submit" class="btn btn-primary" id="get_weather" disabled>Узнать погоду</button>
+            </form>
+        </div>
+    </div>
+    <div class="row hide mt-2" id="zip-code-fields">
+        <div class="col">
+            <form action="{% url 'weather' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="zip-code">Почтовый индекс<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="zip-code" name="zip-code" placeholder="630000" data-parent="zip-code-fields">
+                </div>
+                <div class="form-group">
+                    <label for="country-code">Код страны<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="country-code" name="country-code" placeholder="ru" data-parent="zip-code-fields">
+                </div>
+                <button type="submit" class="btn btn-primary" id="get_weather" disabled>Узнать погоду</button>
+            </form>
+        </div>
+    </div>
+    <div class="row hide mt-2" id="rectangle-zone-fields">
+        <div class="col">
+            <form action="{% url 'weather' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="longitude-left">Градусы восточной долготы (левый верхний угол)<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="longitude-left" name="longitude-left" placeholder="82.92" data-parent="rectangle-zone-fields">
+                </div>
+                <div class="form-group">
+                    <label for="latitude-bottom">Градусы северной широты (левый нижний угол)<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="latitude-bottom" name="latitude-bottom" placeholder="55.03" data-parent="rectangle-zone-fields">
+                </div>
+                <div class="form-group">
+                    <label for="longitude-right">Градусы восточной долготы (правый нижний угол)<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="longitude-right" name="longitude-right" placeholder="84.95" data-parent="rectangle-zone-fields">
+                </div>
+                <div class="form-group">
+                    <label for="latitude-top">Градусы северной широты (правый верхний угол)<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="latitude-top" name="latitude-top" placeholder="56.49" data-parent="rectangle-zone-fields">
+                </div>
+                <div class="form-group">
+                    <label for="zoom">Зум<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="zoom" name="zoom" placeholder="10" data-parent="rectangle-zone-fields">
+                </div>
+                <button type="submit" class="btn btn-primary" id="get_weather" disabled>Узнать погоду</button>
+            </form>
+        </div>
+    </div>
+    <div class="row hide mt-2" id="cycle-zone-fields">
+        <div class="col">
+            <form action="{% url 'weather' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="latitude">Градусы северной широты<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="latitude" name="latitude" placeholder="55.03" data-parent="cycle-zone-fields">
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Градусы восточной долготы<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="longitude" name="longitude" placeholder="82.92" data-parent="cycle-zone-fields">
+                </div>
+                <div class="form-group">
+                    <label for="count">Количество городов вокруг заданной точки<span class="color-red">*</span></label>
+                    <input type="text" class="form-control" id="count" name="count" placeholder="10" data-parent="cycle-zone-fields">
+                </div>
+                <button type="submit" class="btn btn-primary" id="get_weather" disabled>Узнать погоду</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
